@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link type="text/css" rel="stylesheet" href="main.css">
+<link type="text/css" rel="stylesheet" href="modal.css">
+<!--    아이콘을 위한 링크 -->
+<script src="https://kit.fontawesome.com/acbb32aeb8.js" crossorigin="anonymous"></script>
+
+<!--    한글 폰트-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR&display=swap" rel="stylesheet">
+</head>    
+
+<body>
+    <!-- base button -->
+    <button id = "add_feed">창 띄우기</button>
+
+    <!-- modal window -->
+    <div id = "modal_add_feed" class="modal_overlay">
+        <div class="modal_window">
+
+            <!-- modal title start -->
+            <div class="modal_title">
+                <div class="modal_title_side"></div>
+                <div>필기</div>
+                <div class="modal_title_side">
+                    <span id="close_modal" class="fa-solid fa-xmark" style="position: right;"></i>
+                </div>
+            </div>
+            <!-- modal title end -->
+
+            <!-- row start -->
+            <div class="row">
+
+                <!-- left div start -->
+                <div class = "col-6 col-12-small" style="width: 800px; height : 600px;">
+                    <iframe width="780px" height="550px" src="https://www.youtube.com/embed/aftw0WX4oCc" title="YouTube video player" frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    <button id="img_to_text" class="button primary fit" onclick="code_to_text()" type="button" style="padding : 0;">전체 화면 캡쳐</button>
+                </div>
+                <!-- left div end -->
+
+                <!-- right div start -->
+                <div class = "col-6 col-12-small" style="width: 400px; height : 600px; margin-right: 0px;">
+                    <!-- text area old version
+                    <textarea name="demo-message" id="demo-message" placeholder="이곳에 캡쳐랑 필기 쓸 거임" style = "height : 500px; "></textarea> -->
+                    
+                    <!-- start code editor  -->
+                    <select name="language" id="language" onchange="change()" style="margin-bottom: 10px;">
+                        <option value="python">python</option>
+                        <option value="r">r</option>
+                        <option value="java">java</option>
+                        <option value="mysql">mysql</option>
+                        <option value="html">html</option>
+                        <option value="css">css</option>
+                        <option value="c_cpp">c,c++</option>
+                        <option value="markdown">markdown</option>
+                        <option value="javascript">javascript</option>
+                    </select>
+                    <div id="editor" style="margin-bottom: 6px;">#이곳은 코드 에디터입니다.
+#기본은 파이썬 모드
+                    </div>
+                    <ul class="actions fit">
+                        <li><button id="clear_all" class="button fit" onclick="clear_all()" type="button" style="padding : 0;">지우기</button></li>
+                        <li><button id="save_memo" class="button primary fit" onclick="save_memo()" type="button" style="padding : 0;">저장하기</button></li>
+                    </ul>
+                </div>
+                <!-- right div end-->
+            </div> 
+            <!-- row end -->
+        </div>
+        <!-- modal window end -->
+    </div>
+    <!-- gray background end -->
+</body>
+
+<!-- modal window script-->
+<script>
+    //open modal
+    const modal = document.getElementById("modal_add_feed");
+    const buttonAddFeed = document.getElementById("add_feed");
+    buttonAddFeed.addEventListener("click", e => {
+        modal.style.top = window.pageYOffset + 'px'; // top을 이용해 시작 y위치를 바꿔줌 -> 사용자가 스크롤을 내려도 보기에는 고정되는 효과
+        modal.style.display = "flex";
+        document.body.style.overflowY = "hidden"; // 스크롤 없애기
+    });
+    //close modal
+    const buttonCloseModal = document.getElementById("close_modal");
+    buttonCloseModal.addEventListener("click", e => {
+        modal.style.display = "none";
+        document.body.style.overflowY = "visible";
+    });
+</script>
+
+<!-- code editor script -->
+
+<!-- 장고 모드 static path 필요 -> 현재 지정 위치 : 현재 위치의 하위 ace폴더
+
+<script src="{% static './ace/src-noconflict/ace.js' %}" type="text/javascript" charset="utf-8"></script>
+
+장고모드 코드 끝 -->
+
+
+<!-- html python 고정 코드 -->
+<script src="./ace-builds/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
+<script>
+    var editor = ace.edit("editor");
+    editor.setTheme("ace/theme/monokai");
+    editor.session.setMode("ace/mode/python");
+    
+    // 셀렉트 박스가 변경될 때 감지 리스너 -> change language version
+    function change(){
+        var language = document.getElementById('language');
+        var value = language.options[language.selectedIndex].value;
+        editor.session.setMode("ace/mode/"+value);
+    }
+</script>
+
+<!-- save editor memo button -->
+<script>
+    //save button action
+    function save_memo() {
+        var memo = editor.getValue();
+        //memo 변수를 db에 보내서 저장
+        editor.session.setValue(memo + "저장 테스트");
+    }
+    function clear_all() {
+        editor.session.setValue("");
+    }
+</script>
+
+<!-- screenshot script old version : 사용자 메모 편의성을 위해 prepend 에서 append로 수정. -->
+<script>
+    function code_to_text() {
+        $.ajax({
+            url: 'http://127.0.0.1:8000/caffeine/code_to_text/',
+            method: 'POST',
+        }).then(function (response) {
+            $('#editor').append(response[0]);
+            $('#editor').append("<p>====================================================================</p>");
+        });
+    } //codetotext()끝
+</script>

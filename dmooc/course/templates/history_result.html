@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="ko">
+{% load static %}
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
+    <meta name="generator" content="Hugo 0.88.1">
+    <title>Dmooc 내 강의 요약</title>
+    <!--    아이콘을 위한 링크 -->
+    <link href="{% static 'css/main.css' %}" rel="stylesheet">
+    <link type="text/css" rel="stylesheet" href="{% static 'modal.css' %}">
+    <script src="https://kit.fontawesome.com/acbb32aeb8.js" crossorigin="anonymous"></script>
+    <!--    한글 폰트-->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR&display=swap" rel="stylesheet">
+
+</head>
+<body class="is-preload">
+<!-- Wrapper -->
+<div id="wrapper">
+    <!-- Main -->
+    <div id="main">
+        <div class="inner">
+            <!-- Header -->
+            <header id="header">
+                <a href="/course/" class="logo"><strong>강의 요약</strong> by Dmooc</a>
+                <ul class="icons">
+                    <li class="nav-item">
+                        {% if user.is_authenticated %}
+                            <a class="nav-link" href="{% url 'logout' %}">{{ user.username }} (로그아웃)</a>
+                        {% else %}
+                            <a class="nav-link" href="{% url 'login' %}">로그인</a>
+                        {% endif %}
+                    </li>
+                    <li><a href="#" class="icon brands fa-twitter"><span class="label">Twitter</span></a></li>
+                    <li><a href="#" class="icon brands fa-facebook-f"><span class="label">Facebook</span></a></li>
+                    <li><a href="#" class="icon brands fa-snapchat-ghost"><span class="label">Snapchat</span></a></li>
+                    <li><a href="#" class="icon brands fa-instagram"><span class="label">Instagram</span></a></li>
+                </ul>
+            </header>
+            <!--                content -->
+            <section>
+<!--            좌우 품을 행 시작-->
+                <div class="row">
+<!--            좌측 div 시작-->
+                    <div class = "col-6 col-12-small" style="width: 100%;">
+                        <span id="video">
+                            <h3> Lecture Name : <span style="color:#ff3e33">{{ history_lecture.lecture_name }} </span> </h3>
+                            <iframe width="100%" height="500" src={{ history_lecture.embed_url }} title = "YouTube video player"
+                                    frameborder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowfullscreen></iframe>
+                        </span> <!--video span end-->
+                    </div> <!--좌측 div col end-->
+                </div> <!--row div end-->
+
+                <!-- base button -->
+                <button id="add_feed">캡쳐 & 필기</button>
+
+                <!-- modal window -->
+                <div id="modal_add_feed" class="modal_overlay">
+                    <div class="modal_window" style="height:680px;">
+
+                        <!-- modal title start -->
+                        <div class="modal_title">
+                            <div class="modal_title_side"></div>
+                            <div>필기</div>
+                            <div class="modal_title_side">
+                                <span id="close_modal" class="fa-solid fa-xmark" style="position: right;">
+                                </span>
+                            </div>
+                        </div>
+                        <!-- modal title end -->
+
+                        <!-- row start -->
+                        <div class="row">
+
+                            <!-- left div start -->
+                            <div class="col-6 col-12-small" style="width: 800px; height : 600px;">
+                                <iframe width="780px" height="550px" src={{ history_lecture.embed_url }}
+                                        title="YouTube video player" frameborder="0"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                        allowfullscreen></iframe>
+                                <button id="img_to_text" class="button primary fit" onclick="code_to_text()"
+                                        type="button" style="padding : 0;">전체 화면 캡쳐
+                                </button>
+                            </div>
+                            <!-- left div end -->
+
+                            <!-- right div start -->
+                            <div class="col-6 col-12-small" style="width: 400px; height : 600px; margin-right: 0px;">
+                                <!-- text area old version
+                                <textarea name="demo-message" id="demo-message" placeholder="이곳에 캡쳐랑 필기 쓸 거임" style = "height : 500px; "></textarea> -->
+
+                                <!-- start code editor  -->
+                                <select name="language" id="language" onchange="change()" style="margin-bottom: 10px;">
+                                    <option value="python">python</option>
+                                    <option value="r">r</option>
+                                    <option value="java">java</option>
+                                    <option value="mysql">mysql</option>
+                                    <option value="html">html</option>
+                                    <option value="css">css</option>
+                                    <option value="c_cpp">c,c++</option>
+                                    <option value="markdown">markdown</option>
+                                    <option value="javascript">javascript</option>
+                                </select>
+                                <div id="editor" style="margin-bottom: 6px;">#이곳은 코드 에디터입니다.기본은 파이썬 모드
+                                </div>
+
+                                <ul class="actions fit">
+                                    <li>
+                                        <button id="clear_all" class="button fit" onclick="clear_all()" type="button"
+                                                style="padding : 0;">지우기
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button id="save_memo" class="button primary fit" onclick="save_memo()"
+                                                type="button" style="padding : 0;">저장하기
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
+                            <!-- right div end-->
+                        </div>
+                        <!-- row end -->
+                    </div>
+                    <!-- modal window end -->
+                </div>
+                <!-- gray background end -->
+
+                <div class="box">
+                    <div class="box">
+                        <div class="h-100 p-5 text-white bg-dark rounded-3">
+                            <h2>강의 전문</h2>
+
+                            <div id="textall" style="height : 768px ; margin-left: 0px; overflow:auto;">
+                                {% autoescape off %}
+                                {{ history_lecture.lecture_note }}
+                                {% endautoescape %}
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="box">
+                        <div class="h-100 p-5 text-white bg-dark rounded-3">
+                            <h2>강의 요약</h2>
+                            <div id="sumall" style="margin-left: 0px;">
+                                {% autoescape off %}
+                                {{history_lecture.lecture_sum}}
+                                {% endautoescape %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="box">
+                    <div id="plot_box" class="box">
+                        <div class="h-100 p-5 text-white bg-dark rounded-3">
+                            <h2>키워드 추출</h2>
+                            <div id="loading3" style="margin-left: 0px; display: none;">
+                                <h4>키워드 추출중...</h4>
+                            </div>
+<!--{#                            <div id="keyword" style="margin-left: 0px; display: none;">#}-->
+<!--{#                            </div>#}-->
+<!--{#                            <div id="plot_box" class="box" style="width: 80%;">#}-->
+                                {# 동글이 자리#}
+<!--{#                            </div>#}-->
+                            <button id="button3" class="button" onclick="keytext()" type="button">3.
+                                키워드 추출
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="box">
+                        <div class="h-100 p-5 text-white bg-dark rounded-3">
+                            <h2>빈칸 문제</h2>
+                            <div class="box" id="loading4" style="margin-left: 0px; display: none;">
+                                <h4>문제 생성중...</h4>
+                            </div>
+                            <div class="box" id="exercise" style="margin-left: 0px; display: none;">
+                            </div>
+                            <button id="button4" class="btn btn-outline-secondary" onclick="showanswer()"
+                                    type="button" style="display: none;">4. 정답확인
+                            </button>
+                            <div class="box" id="answer" style="margin-left: 0px; display: none;"></div>
+                        </div>
+                    </div>
+                </div>
+                <!--            section content end-->
+            </section>
+            <!-- inner end -->
+        </div>
+        <!--main end-->
+    </div>
+    <!--        side bar start-->
+    <div id="sidebar">
+        <div class="inner">
+
+            <!-- Search -->
+            <section id="search" class="alt">
+                <form method="post" action="/course/searchlec/">
+                    <input type="text" name="query" id="query" placeholder="Search"/>
+                </form>
+            </section>
+
+            <!-- Menu -->
+            <nav id="menu">
+                <header class="major">
+                    <h2>Menu</h2>
+                </header>
+                <ul>
+                    <li><a href="/course/">내 강의 +</a></li>
+                    <li><a href="/course/board/">내 강의노트</a></li>
+                    <li><a href="/boards/list/">커뮤니티</a></li>
+                </ul>
+            </nav>
+
+            <!-- Section -->
+            <section>
+                <header class="major">
+                    <h2>Get in touch</h2>
+                </header>
+                <p>영어로 강의 문제 없어요!!!</p>
+                <ul class="contact">
+                    <li class="icon solid fa-envelope"><a href="#">information@caffeine.ac.kr</a></li>
+                    <li class="icon solid fa-phone">(010) 1234-5678</li>
+                    <li class="icon solid fa-home">30, Pildong-ro 1-gil, Jung-gu, Seoul, Republic of Korea<br/>
+                        02-2260-0000
+                    </li>
+                </ul>
+            </section>
+
+            <!-- Footer -->
+            <footer id="footer">
+                <p class="copyright">&copy; Caffeine. All rights reserved.</p>
+            </footer>
+            <!--inner end-->
+        </div>
+        <!--    sidebar end-->
+    </div>
+    <!--wrapper end-->
+</div>
+
+</body>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+    let a1, a2, a3, a4, a5
+    function keytext() {
+        $('#loading3').show();
+        $('#loading4').show();
+        $.ajax({
+            url: '/course/keytext/',
+            method: 'POST',
+            data: {'text': $('#textall').html()}
+        }).then(function (response) {
+            a1 = response.answer1;
+            a2 = response.answer2;
+            a3 = response.answer3;
+            a4 = response.answer4;
+            a5 = response.answer5;
+            $('#loading3').hide();
+            $('#loading4').hide();
+            $('#keyword').show();
+            $('#plot_box').append(response.plot_html);
+            $('#exercise').html("<div>Q1. <br>" + response.sentence_blank1);
+            $('#exercise').append('<input type=text id=test1 placeholder="정답을 입력해주세요." style= "width:20%;display:inline;">' + '<input class="btn btn-primary" type="button" onclick ="check1()" value="정답확인" style="position: absolute; margin-left: 10px;">' + "</div>");
+            $('#exercise').append("<div>Q2. <br>" + response.sentence_blank2 );
+            $('#exercise').append('<input type=text id=test2 placeholder="정답을 입력해주세요." style= "width:20%;display:inline;">' + '<input class="btn btn-primary" type="button" onclick ="check2()" value="정답확인" style="position: absolute; margin-left: 10px;">' + "</div>");
+            $('#exercise').append("<div>Q3. <br>" + response.sentence_blank3 );
+            $('#exercise').append('<input type=text id=test3 placeholder="정답을 입력해주세요." style= "width:20%;display:inline;">' + '<input class="btn btn-primary" type="button" onclick ="check3()" value="정답확인" style="position: absolute; margin-left: 10px;">' + "</div>");
+            $('#exercise').append("<div>Q4. <br>" + response.sentence_blank4 );
+            $('#exercise').append('<input type=text id=test4 placeholder="정답을 입력해주세요." style= "width:20%;display:inline;">' + '<input class="btn btn-primary" type="button" onclick ="check4()" value="정답확인" style="position: absolute; margin-left: 10px;">' + "</div>");
+            $('#exercise').append("<div>Q5. <br>" + response.sentence_blank5 );
+            $('#exercise').append('<input type=text id=test5 placeholder="정답을 입력해주세요." style= "width:20%;display:inline;">' + '<input class="btn btn-primary" type="button" onclick ="check5()" value="정답확인" style="position: absolute; margin-left: 10px;">' + "</div>");
+            $('#exercise').show();
+            $('#answer').html("<p>A1.&nbsp" + response.answer1 + "<br>" + response.sentence1 + "</p>");
+            $('#answer').append("<p>A2.&nbsp" + response.answer2 + "<br>" + response.sentence2 + "</p>");
+            $('#answer').append("<p>A3.&nbsp" + response.answer3 + "<br>" + response.sentence3 + "</p>");
+            $('#answer').append("<p>A4.&nbsp" + response.answer4 + "<br>" + response.sentence4 + "</p>");
+            $('#answer').append("<p>A5.&nbsp" + response.answer5 + "<br>" + response.sentence5 + "</p>");
+            $('#button3').hide();
+            $('#button4').show();
+        });
+    }
+</script>
+
+<script>
+    function savedb() {
+        $.ajax({
+            url: '/course/savedb/',
+            method: 'POST',
+        }).then(function (response) {
+            $('#button_save').hide();
+            alert(response)
+        });
+    }
+
+    function check1() {
+        if ($("#test1").val() == a1){
+            alert("정답입니다!")
+        }else{
+            alert("땡")
+        }
+    }
+    function check2() {
+        if ($("#test2").val() == a2){
+            alert("정답입니다!")
+        }else{
+            alert("땡")
+        }
+    }
+    function check3() {
+        if ($("#test3").val() == a3){
+            alert("정답입니다!")
+        }else{
+            alert("땡")
+        }
+    }
+    function check4() {
+        if ($("#test4").val() == a4){
+            alert("정답입니다!")
+        }else{
+            alert("땡")
+        }
+    }
+    function check5() {
+        if ($("#test5").val() == a5){
+            alert("정답입니다!")
+        }else{
+            alert("땡")
+        }
+    }
+</script>
+
+<script>
+    function showanswer() {
+        $('#answer').show();
+        $('#button4').hide();
+    }
+</script>
+<!-- modal window script-->
+<script>
+    //open modal
+    const modal = document.getElementById("modal_add_feed");
+    const buttonAddFeed = document.getElementById("add_feed");
+    buttonAddFeed.addEventListener("click", e => {
+        modal.style.top = window.pageYOffset + 'px'; // top을 이용해 시작 y위치를 바꿔줌 -> 사용자가 스크롤을 내려도 보기에는 고정되는 효과
+        modal.style.display = "flex";
+        document.body.style.overflowY = "hidden"; // 스크롤 없애기
+    });
+    //close modal
+    const buttonCloseModal = document.getElementById("close_modal");
+    buttonCloseModal.addEventListener("click", e => {
+        modal.style.display = "none";
+        document.body.style.overflowY = "visible";
+    });
+</script>
+
+<!-- code editor script -->
+
+<!-- 장고 모드 static path 필요 -> 현재 지정 위치 : 현재 위치의 하위 ace폴더
+
+<script src="{% static './ace/src-noconflict/ace.js' %}" type="text/javascript" charset="utf-8"></script>
+
+장고모드 코드 끝 -->
+
+<script src="{% static './ace-builds/src-noconflict/ace.js' %}" type="text/javascript" charset="utf-8"></script>
+
+<!-- html python 고정 코드 -->
+<!--<script src="./ace-builds/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>-->
+
+<script>
+    var editor = ace.edit("editor");
+    editor.setTheme("ace/theme/monokai");
+    editor.session.setMode("ace/mode/python");
+
+    function code_to_text() {
+        $.ajax({
+            url: '/course/code_to_text/',
+            method: 'POST',
+        }).then(function (response) {
+            var memo = editor.getValue();
+            editor.session.setValue(memo + response[0]);
+        });
+    } //codetotext()끝
+
+    // 셀렉트 박스가 변경될 때 감지 리스너 -> change language version
+    function change() {
+        var language = document.getElementById('language');
+        var value = language.options[language.selectedIndex].value;
+        editor.session.setMode("ace/mode/" + value);
+    }
+</script>
+
+<!-- save editor memo button -->
+<script>
+    //save button action
+    function save_memo() {
+        var memo = editor.getValue();
+        //memo 변수를 db에 보내서 저장
+        editor.session.setValue(memo + "저장 완료");
+    }
+
+    function clear_all() {
+        editor.session.setValue("");
+    }
+</script>
+<script src="{% static 'js/jquery.min.js' %}"></script>
+<script src="{% static 'js/browser.min.js' %}"></script>
+<script src="{% static 'js/breakpoints.min.js' %}"></script>
+<script src="{% static 'js/util.js' %}"></script>
+<script src="{% static 'js/main.js' %}"></script>
+
+</html>
